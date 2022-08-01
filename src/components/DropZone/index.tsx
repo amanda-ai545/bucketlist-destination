@@ -1,34 +1,47 @@
-import { Typography } from '@mui/material';
-import React, { useCallback, useState, useEffect } from 'react';
+import { FC, useCallback, useState, useEffect, SyntheticEvent } from 'react';
 import { useDropzone } from 'react-dropzone';
 
+import { Typography } from '@mui/material';
 import { useStyles } from './style';
+
+
+// import * as icoUpload from '../../assets/images/ico_upload_image';
 
 const img = {
   display: 'block',
   width: '100%',
-  height: '100%',
-  background: '#000'
+  // background: '#000'
 };
 
-const DropZone = () => {
+type IProps = {
+  name: string,
+  getImage: (image: string) => void,
+}
+
+const DropZone: FC<IProps> = ({ name, getImage }) => {
   const classes = useStyles();
+
   const [image, setImage] = useState<any>([]);
   const [err, setErr] = useState<any>();
 
+  const createBase64Image = (fileObject: any) => {
+    if (fileObject) {
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        setImage(e.target.result);
+      };
+
+      reader.readAsDataURL(fileObject);
+    }
+    return;
+  }
+
   const onDrop = useCallback((acceptedFiles: any, rejectedFiles: any) => {
-    // Do something with the files
-
-    console.log("------> acceptedFiles", acceptedFiles)
-    console.log("------> rejectedFiles", rejectedFiles)
-    console.log("------> image", image)
-
     if (rejectedFiles.length) {
       setErr(rejectedFiles[0].errors[0].message);
     } else {
-      setImage(acceptedFiles.map((file: any) => Object.assign(file, {
-        preview: URL.createObjectURL(file)
-      })));
+      createBase64Image(acceptedFiles[0]);
     }
   }, [])
 
@@ -38,22 +51,25 @@ const DropZone = () => {
       'image/*': []
     },
     maxFiles: 1,
-  })
+  });
+
+  useEffect(() => {
+    getImage(image)
+  }, [image])
 
   return (
     <>
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        {
-          isDragActive ?
-            <p>Drop the files here ...</p> :
-            <p>Drag 'n' drop some files here, or click to select files</p>
+      <div className={classes.dropzone} {...getRootProps()}>
+        <input name={name} {...getInputProps()} />
+
+        {isDragActive ? <p className={classes.dropzone__label}>Drop the files here ...</p>
+          : <p className={classes.dropzone__label}>Drag 'n' drop some files here, or click to select files</p>
         }
 
         <img
-          src={image[0]?.preview}
+          src={image}
           style={img}
-          onLoad={() => { URL.revokeObjectURL(image[0]?.preview) }}
+          onLoad={() => { URL.revokeObjectURL(image) }}
         />
 
         {err && <Typography variant="caption" component="p">{err}</Typography>}

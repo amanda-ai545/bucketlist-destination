@@ -12,8 +12,12 @@ code {
 }
 * {
   word-wrap: break-word;
+  box-sizing: border-box;
 }
 #root {
   position: relative;
   min-height: 100vh;
+}
+.mb-20 {
+  margin-bottom: 20px;
 }

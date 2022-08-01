@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { Link } from "react-router-dom";
 
 import { Container, Box, Grid, Typography } from '@mui/material';
@@ -22,7 +22,7 @@ const HeaderArea: FC = () => {
                 <Link to="/" className={classes.header__link}>Home</Link>
               </Grid>
               <Grid item xs="auto">
-                <Link to="destinations" className={classes.header__link}>Destinations</Link>
+                <Link to="/destinations" className={classes.header__link}>Destinations</Link>
               </Grid>
               <Grid item xs="auto">
                 <Link to="/bookmarks" className={classes.header__link}>Bookmarks</Link>

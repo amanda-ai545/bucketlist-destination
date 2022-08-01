@@ -1,9 +1,21 @@
-import React, { FC, useEffect } from 'react';
+import { FC, useContext } from 'react';
+import { Link } from "react-router-dom";
 
 import { Box, Grid, Typography } from '@mui/material';
+import { useStyles } from './style';
+
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { AppContext } from '../../contexts';
+import { items } from '../../services/mocks/items.mock';
+
 import CardArea from '../../components/Card';
+import { useLimitItems } from '../../hooks/useLimitItems';
 
 const HomeArea: FC = () => {
+  const classes = useStyles();
+  const [bucketList] = useLocalStorage("bucketList");
+  const { limitItems, isLoading } = useLimitItems(bucketList, 3);
+
   return (
     <>
       <Box marginBottom={5}>
@@ -11,9 +23,13 @@ const HomeArea: FC = () => {
           Bookmarks
         </Typography>
 
-        <Typography variant="body1" component="p">
-          No data found.
-        </Typography>
+        <CardArea items={limitItems} toggleBookmark={(id: number) => console.log(id)} />
+
+        <Grid container justifyContent="right">
+          <Grid item xs="auto">
+            <Link to="/bookmarks" className={classes.home__link}>See More</Link>
+          </Grid>
+        </Grid>
       </Box>
 
       <Box>
@@ -21,17 +37,7 @@ const HomeArea: FC = () => {
           Destinations
         </Typography>
 
-        <Grid container spacing={5}>
-          <Grid item xs={12} sm={6} md={4} lg={3}>
-            <CardArea />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4} lg={3}>
-            <CardArea />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4} lg={3}>
-            <CardArea />
-          </Grid>
-        </Grid>
+        <CardArea items={bucketList} toggleBookmark={(id: number) => console.log(id)} />
       </Box>
     </>
   )

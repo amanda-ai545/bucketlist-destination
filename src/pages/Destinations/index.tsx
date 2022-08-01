@@ -1,141 +1,102 @@
-import { FC, FormEvent, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { FC, useEffect, useState, useContext } from 'react';
+import { Controller, useForm } from "react-hook-form";
 import Select from 'react-select';
 
-import { Box, Grid, Modal, Button, Typography, FormControl } from '@mui/material';
-import Card from '../../components/Card';
+import { Box, Grid, Modal, Button, Typography } from '@mui/material';
+import { useStyles } from './style';
+
+import { services } from '../../services/destinations.service';
+import { AppContext } from '../../contexts';
+import { CountryTypes, StateTypes, OptionType, OptionTypeCity, ItemsTypes } from '../../types';
+
 import DropZone from '../../components/DropZone';
-
-import { getAllCountries } from '../../store/slices/countries';
-import { AppDispatch } from '../../store';
-import { CityType, CountryType, IGlobalCountries, StateType } from '../../models/index.model';
-import { getAllStates } from '../../store/slices/states';
-import { getAllCities } from '../../store/slices/cities';
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
-type OptionType = {
-  value: string,
-  label: string
-}
-
-type OptionTypeCity = {
-  value: number | null,
-  label: string
-}
-
-type DatasType = {
-  countryISO2: string,
-  stateISO2: string,
-}
-
-interface IFormValues {
-  id: number | null,
-  country: OptionType,
-  state: OptionType,
-  city: OptionTypeCity,
-  isBookmark: boolean,
-}
+import CardArea from '../../components/Card';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 const DestinationsArea: FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
-
-  const [bucketList, setBucketList] = useState<any[]>(() => {
-    const savedBucketList = localStorage.getItem('bucketList');
-
-    if (savedBucketList) {
-      return JSON.parse(savedBucketList)
-    } else {
-      return []
-    }
-  });
-  const [countries, setCountries] = useState<any>();
-  const [states, setStates] = useState<any>();
-  const [cities, setCities] = useState<any>();
-
+  const classes = useStyles();
+  const { state, dispatch } = useContext(AppContext);
+  const [bucketList, setBucketList] = useLocalStorage("bucketList");
+  const [selectedCountry, setSelectedCountry] = useState<string | null>();
+  const [selectedState, setSelectedState] = useState<string | null>();
+  const [selectImage, setSelectImage] = useState("");
   const [open, setOpen] = useState(false);
 
+  const handleCountries = async () => {
+    try {
+      const response = await services.getLocation("/countries");
+      const countryOption = response.data.map((country: CountryTypes): OptionType => ({
+        value: country.iso2,
+        label: country.name,
+      }));
 
-  const [formValues, setFormValues] = useState<IFormValues>({
-    id: null,
-    country: { value: '', label: '' },
-    state: { value: '', label: '' },
-    city: { value: null, label: '' },
-    isBookmark: false,
-  })
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const loadCountries = async () => {
-    const data = await dispatch(getAllCountries());
-
-    setCountries({ status: data.meta.requestStatus, data: data.payload })
+      dispatch({
+        type: "SET_COUNTRIES", payload: countryOption
+      });
+    } catch (error) {
+      console.log(error)
+    }
   };
 
-  const handleCountry = async (values: OptionType) => {
-    const data = await dispatch(getAllStates(values.value));
+  const handleStates = async () => {
+    try {
+      const response = await services.getLocation(`/countries/${selectedCountry}/states`);
 
-    setFormValues({
-      ...formValues,
-      country: values
-    })
+      const stateOption = response.data.map((state: StateTypes): OptionType => ({
+        value: state.iso2,
+        label: state.name,
+      }));
 
-    setStates({ status: data.meta.requestStatus, data: data.payload });
-  }
-
-  const handleState = async (values: OptionType) => {
-    setFormValues({
-      ...formValues,
-      state: values
-    })
-
-    const datas: DatasType = {
-      countryISO2: formValues?.country?.value,
-      stateISO2: values?.value
+      dispatch({
+        type: "SET_STATES", payload: stateOption
+      });
+    } catch (error) {
+      console.log(error)
     }
+  };
 
-    const data = await dispatch(getAllCities(datas));
+  const handleCountry = async () => {
+    try {
+      const response = await services.getLocation(`/countries/${selectedCountry}/states/${selectedState}/cities`);
 
-    setCities({ status: data.meta.requestStatus, data: data.payload });
-  }
+      const cityOption = response.data.map((state: StateTypes): OptionTypeCity => ({
+        value: state.id,
+        label: state.name,
+      }));
 
-  const handleCity = (values: OptionTypeCity) => {
-    setFormValues({
-      ...formValues,
-      city: values
-    })
-  }
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    formValues.id = Date.now()
-
-    if (formValues) {
-      setBucketList([
-        ...bucketList,
-        formValues
-      ])
+      dispatch({
+        type: "SET_CITIES", payload: cityOption
+      });
+    } catch (error) {
+      console.log(error)
     }
   }
 
-  const handleBookmark = (id: any) => {
-    console.log("id item", id);
-    let updatedItems = bucketList.map((item: any) => {
+  const { control, handleSubmit, reset } = useForm<ItemsTypes>({
+    defaultValues: {
+      country: {},
+      state: {},
+      city: {},
+      image: "",
+      isBookmark: false,
+    },
+  });
+
+  const handleOpen = () => setOpen(true);
+
+  const handleClose = () => {
+    reset();
+    setOpen(false);
+    setSelectedCountry(null);
+    setSelectedState(null);
+  };
+
+  const handleBookmark = (id: number) => {
+    let updatedItems = bucketList.map((item: ItemsTypes) => {
       if (item.id === id) {
         return {
-          ...item, isBookmark: !item.isBookmark
+          ...item,
+          isBookmark: !item?.isBookmark,
         }
       } else {
         return item
@@ -145,30 +106,39 @@ const DestinationsArea: FC = () => {
     setBucketList(updatedItems)
   }
 
-  const countryOption = countries?.data?.map((country: CountryType): OptionType => ({
-    value: country?.iso2,
-    label: country?.name,
-  }));
+  const onSubmit = (data: ItemsTypes) => {
+    data.id = Date.now();
+    data.image = selectImage;
 
-  const statesOption = states?.data?.map((state: StateType): OptionType => ({
-    value: state?.iso2,
-    label: state?.name,
-  }));
+    setBucketList([
+      ...bucketList,
+      data,
+    ])
 
-  const cityOption = cities?.data?.map((city: CityType): OptionTypeCity => ({
-    value: city?.id,
-    label: city?.name,
-  }));
+    reset();
+    setOpen(false);
+    setSelectedCountry(null);
+    setSelectedState(null);
+  };
 
   useEffect(() => {
-    loadCountries();
+    handleCountries();
+  }, []);
+
+  useEffect(() => {
+    handleStates();
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    handleCountry();
+  }, [selectedState]);
+
+  useEffect(() => {
     localStorage.setItem('bucketList', JSON.stringify(bucketList))
-  }, [formValues, bucketList]);
+  }, [bucketList]);
 
   return (
     <>
-      {localStorage.getItem('bucketList')}
-
       <Grid container justifyContent="right">
         <Grid item>
           <Button variant="contained" onClick={handleOpen}>Add Destination</Button>
@@ -179,14 +149,7 @@ const DestinationsArea: FC = () => {
         <Typography variant="h2" component="h2">
           Destinations
         </Typography>
-
-        <Grid container spacing={5}>
-          {bucketList.map((item: any) => (
-            <Grid item md={4} key={item.id}>
-              <Card item={item} toggleBookmark={handleBookmark} />
-            </Grid>
-          ))}
-        </Grid>
+        <CardArea items={bucketList} toggleBookmark={handleBookmark} />
       </Box>
 
       <Modal
@@ -195,38 +158,67 @@ const DestinationsArea: FC = () => {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
-          <form onSubmit={(e: FormEvent) => handleSubmit(e)}>
-            <DropZone />
+        <Box className={classes.modal__box}>
+          <Typography variant="h3" component="h3" marginBottom="20px">
+            Add Destination
+          </Typography>
 
-            <Select
-              options={countryOption}
-              onChange={(values: any) => handleCountry(values)}
-              isLoading={countries?.status !== 'fulfilled'}
-              isSearchable
+          <form onSubmit={handleSubmit((data: ItemsTypes) => onSubmit(data))}>
+            <DropZone name="image" getImage={(image: string) => setSelectImage(image)} />
+
+            <Controller
+              name="country"
+              control={control}
+              render={({ field: { onChange, value, name, ref } }) => <Select
+                className="mb-20"
+                options={state.countries}
+                value={state.countries.find((c: OptionType) => c.value === value.value)}
+                onChange={(val: any) => {
+                  setSelectedCountry(val.value)
+                  onChange(val)
+                }}
+                isSearchable
+                isClearable
+              />}
             />
 
-            {formValues.country.label.length > 0 &&
-              <Select
-                options={statesOption}
-                onChange={(values: any) => handleState(values)}
-                isLoading={states?.status !== 'fulfilled'}
+            {selectedCountry && <Controller
+              name="state"
+              control={control}
+              render={({ field: { onChange, value, name, ref } }) => <Select
+                className="mb-20"
+                options={state.states}
+                value={state.states.find((s: OptionType) => s.value === value?.value)}
+                onChange={(val: any) => {
+                  setSelectedState(val.value)
+                  onChange(val)
+                }}
                 isSearchable
+                isClearable
               />}
+            />}
 
-            {formValues.state.label.length > 0 &&
-              <Select
-                options={cityOption}
-                isLoading={cities?.status !== 'fulfilled'}
-                onChange={(values: any) => handleCity(values)}
+            {selectedState && <Controller
+              name="city"
+              control={control}
+              render={({ field: { onChange, value, name, ref } }) => <Select
+                options={state.cities}
+                value={state.cities.find((c: OptionTypeCity) => c?.value === value?.value)}
+                onChange={(val: any) => onChange(val)}
                 isSearchable
+                isClearable
               />}
+            />}
 
-            <Button type="button" onClick={handleClose}>Close</Button>
-            <Button type="submit">Submit</Button>
+            <Grid container justifyContent="end">
+              <Grid item xs="auto">
+                <Button type="button" onClick={handleClose}>Close</Button>
+              </Grid>
+              <Grid item xs="auto">
+                <Button type="submit">Submit</Button>
+              </Grid>
+            </Grid>
           </form>
-
-          {JSON.stringify(formValues)}
         </Box>
       </Modal>
     </>

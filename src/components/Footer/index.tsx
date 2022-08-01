@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 import { Box, Container, Typography } from '@mui/material';
 import { useStyles } from './style';
@@ -9,9 +9,7 @@ const FooterArea: FC = () => {
   return (
     <Box className={classes.footer}>
       <Container maxWidth="lg">
-        <Typography component="p">
-          Copyright © 2022 Bucket List, Inc.
-        </Typography>
+        <Typography component="p">Copyright © 2022 Bucket List, Inc.</Typography>
       </Container>
     </Box>
   )
