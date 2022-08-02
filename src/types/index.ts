@@ -5,17 +5,17 @@ export type ItemsTypes = {
   city: OptionTypeCity,
   image: string,
   isBookmark: boolean,
-}
+};
 
 export type OptionType = {
   value: string,
   label: string
-}
+};
 
 export type OptionTypeCity = {
-  value: number | null,
+  value: number,
   label: string
-}
+};
 
 export type CardTypes = {
   items: ItemsTypes[],
@@ -41,9 +41,9 @@ export type StateTypes = {
 };
 
 export type FormTypes = {
-  id: number | null,
+  id: number,
   country: OptionType,
   state: OptionType,
   city: OptionTypeCity,
   isBookmark: boolean,
-}
+};

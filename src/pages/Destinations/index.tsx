@@ -20,7 +20,7 @@ const DestinationsArea: FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<string | null>();
   const [selectedState, setSelectedState] = useState<string | null>();
   const [selectImage, setSelectImage] = useState("");
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleCountries = async () => {
     try {
@@ -34,14 +34,13 @@ const DestinationsArea: FC = () => {
         type: "SET_COUNTRIES", payload: countryOption
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
   const handleStates = async () => {
     try {
       const response = await services.getLocation(`/countries/${selectedCountry}/states`);
-
       const stateOption = response.data.map((state: StateTypes): OptionType => ({
         value: state.iso2,
         label: state.name,
@@ -51,14 +50,13 @@ const DestinationsArea: FC = () => {
         type: "SET_STATES", payload: stateOption
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
 
-  const handleCountry = async () => {
+  const handleCities = async () => {
     try {
       const response = await services.getLocation(`/countries/${selectedCountry}/states/${selectedState}/cities`);
-
       const cityOption = response.data.map((state: StateTypes): OptionTypeCity => ({
         value: state.id,
         label: state.name,
@@ -68,11 +66,12 @@ const DestinationsArea: FC = () => {
         type: "SET_CITIES", payload: cityOption
       });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const { control, handleSubmit, reset } = useForm<ItemsTypes>({
+    // resolver: yupResolver(schema),
     defaultValues: {
       country: {},
       state: {},
@@ -82,11 +81,11 @@ const DestinationsArea: FC = () => {
     },
   });
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => setIsOpen(true);
 
   const handleClose = () => {
     reset();
-    setOpen(false);
+    setIsOpen(false);
     setSelectedCountry(null);
     setSelectedState(null);
   };
@@ -99,12 +98,12 @@ const DestinationsArea: FC = () => {
           isBookmark: !item?.isBookmark,
         }
       } else {
-        return item
+        return item;
       }
-    })
+    });
 
-    setBucketList(updatedItems)
-  }
+    setBucketList(updatedItems);
+  };
 
   const onSubmit = (data: ItemsTypes) => {
     data.id = Date.now();
@@ -113,47 +112,49 @@ const DestinationsArea: FC = () => {
     setBucketList([
       ...bucketList,
       data,
-    ])
+    ]);
 
     reset();
-    setOpen(false);
+    setIsOpen(false);
     setSelectedCountry(null);
     setSelectedState(null);
   };
 
   useEffect(() => {
     handleCountries();
-  }, []);
+  });
 
   useEffect(() => {
     handleStates();
   }, [selectedCountry]);
 
   useEffect(() => {
-    handleCountry();
+    handleCities();
   }, [selectedState]);
 
   useEffect(() => {
-    localStorage.setItem('bucketList', JSON.stringify(bucketList))
+    localStorage.setItem('bucketList', JSON.stringify(bucketList));
   }, [bucketList]);
 
   return (
     <>
-      <Grid container justifyContent="right">
-        <Grid item>
+      <Grid container justifyContent="space-between">
+        <Grid item xs="auto">
+          <Typography variant="h2" component="h2">
+            Destinations
+          </Typography>
+        </Grid>
+        <Grid item xs="auto">
           <Button variant="contained" onClick={handleOpen}>Add Destination</Button>
+        </Grid>
+
+        <Grid item xs={12}>
+          <CardArea items={bucketList} toggleBookmark={handleBookmark} />
         </Grid>
       </Grid>
 
-      <Box>
-        <Typography variant="h2" component="h2">
-          Destinations
-        </Typography>
-        <CardArea items={bucketList} toggleBookmark={handleBookmark} />
-      </Box>
-
       <Modal
-        open={open}
+        open={isOpen}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"

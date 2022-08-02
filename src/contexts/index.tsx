@@ -1,32 +1,26 @@
-import { ReactNode, createContext, useReducer } from "react";
+import { ReactNode, createContext, useReducer } from 'react';
 import { OptionType, OptionTypeCity } from '../types';
 
 interface IProps {
   children: ReactNode;
-}
+};
 
 const initialState = {
   countries: [],
   states: [],
   cities: [],
-  selectedCountry: null,
-  selectedState: null,
 };
 
 type StateTypes = {
   countries: OptionType[],
   states: OptionType[],
   cities: OptionTypeCity[],
-  selectedCountry: string | null,
-  selectedState: string | null,
 };
 
 type ActionTypes =
   | { type: "SET_COUNTRIES", payload: OptionType[] }
   | { type: "SET_STATES", payload: OptionType[] }
-  | { type: "SET_CITIES", payload: OptionTypeCity[] }
-  | { type: "SET_SELECTED_COUNTRY", payload: string }
-  | { type: "SET_SELECTED_STATES", payload: string };
+  | { type: "SET_CITIES", payload: OptionTypeCity[] };
 
 type DispatchTypes = (action: ActionTypes) => void;
 
@@ -47,19 +41,9 @@ const reducer = (state: StateTypes, action: ActionTypes) => {
         ...state,
         cities: action.payload,
       };
-    case "SET_SELECTED_COUNTRY":
-      return {
-        ...state,
-        selectedCountry: action.payload,
-      };
-    case "SET_SELECTED_STATES":
-      return {
-        ...state,
-        selectedState: action.payload,
-      };
     default:
       return state;
-  }
+  };
 };
 
 const AppContext = createContext<{
@@ -75,6 +59,6 @@ function AppProvider({ children }: IProps) {
       {children}
     </AppContext.Provider>
   );
-}
+};
 
 export { AppContext, AppProvider };

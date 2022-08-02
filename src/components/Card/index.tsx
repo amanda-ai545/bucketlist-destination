@@ -1,24 +1,25 @@
 import { FC } from 'react';
 
-import { Grid, Typography, IconButton, Card, CardMedia, CardContent, CircularProgress } from '@mui/material';
+import { Grid, Typography, IconButton, Card, CardMedia, CardContent } from '@mui/material';
 import { LocationOn, TurnedInNot, TurnedIn } from '@mui/icons-material';
 import { useStyles } from './style';
 
 import { CardTypes, ItemsTypes } from '../../types';
+import DefaultImg from "../../../src/assets/images/no_image.jpeg";
 
-const CardArea: FC<CardTypes> = ({ items, toggleBookmark }) => {
+const CardArea: FC<CardTypes> = ({ items = [], toggleBookmark }) => {
   const classes = useStyles();
 
   return (
     <>
-      <Grid container spacing={5}>
-        {items?.map((item: ItemsTypes) => (
+      {items.length ? <Grid container spacing={5}>
+        {items.map((item: ItemsTypes) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={item.id}>
             <Card className={classes.card}>
               <CardMedia
                 component="img"
                 height="300"
-                image={item.image}
+                image={item.image ? item.image : DefaultImg}
               />
               <CardContent>
                 <Grid container justifyContent="space-between" alignItems="center">
@@ -28,7 +29,7 @@ const CardArea: FC<CardTypes> = ({ items, toggleBookmark }) => {
                     </Grid>
                     <Grid item xs={10}>
                       <Typography component="p" className={classes.card__location}>
-                        {item.country.label}, {item.state.label}, {item.city.label}
+                        {item.country.label} {item.state.label} {item.city.label}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -43,7 +44,11 @@ const CardArea: FC<CardTypes> = ({ items, toggleBookmark }) => {
             </Card>
           </Grid>
         ))}
-      </Grid>
+      </Grid> : ""}
+
+      {!items.length && <Typography variant="caption" component="h2">
+        No data found.
+      </Typography>}
     </>
   )
 }

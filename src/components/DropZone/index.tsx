@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, useEffect, SyntheticEvent } from 'react';
+import { FC, useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 
 import { Typography } from '@mui/material';
@@ -21,7 +21,7 @@ type IProps = {
 const DropZone: FC<IProps> = ({ name, getImage }) => {
   const classes = useStyles();
 
-  const [image, setImage] = useState<any>([]);
+  const [image, setImage] = useState<any>();
   const [err, setErr] = useState<any>();
 
   const createBase64Image = (fileObject: any) => {
@@ -68,6 +68,7 @@ const DropZone: FC<IProps> = ({ name, getImage }) => {
 
         <img
           src={image}
+          alt=""
           style={img}
           onLoad={() => { URL.revokeObjectURL(image) }}
         />

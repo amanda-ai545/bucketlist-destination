@@ -1,11 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { ThemeProvider } from '@mui/material/styles';
 import { Container } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 
 import { AppProvider } from './contexts';
+
 import HeaderArea from './components/Header';
 import FooterArea from './components/Footer';
+
 import HomeArea from './pages/Home';
 import DestinationsArea from './pages/Destinations';
 import BookmarksArea from './pages/Bookmarks';
@@ -34,6 +36,6 @@ function App() {
       </BrowserRouter>
     </AppProvider>
   );
-}
+};
 
 export default App;

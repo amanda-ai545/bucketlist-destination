@@ -1,18 +1,44 @@
-import React, { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 
-import { Box, Grid, Typography } from '@mui/material';
-import Card from '../../components/Card';
+import { Box, Typography } from '@mui/material';
+
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { ItemsTypes } from '../../types';
+import CardArea from '../../components/Card';
 
 const BookmarksArea: FC = () => {
+  const [bucketList, setBucketList] = useLocalStorage("bucketList");
+  const [bookmarkItems, setBookmarkItems] = useState<ItemsTypes[]>([]);
+
+  const handleBookmark = (id: number) => {
+    let updatedItems = bucketList.map((item: ItemsTypes) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          isBookmark: !item?.isBookmark,
+        }
+      } else {
+        return item;
+      }
+    });
+
+    setBucketList(updatedItems);
+  };
+
+  useEffect(() => {
+    const filterItems = bucketList.filter((item: any) => item.isBookmark === true);
+    localStorage.setItem('bucketList', JSON.stringify(bucketList));
+
+    setBookmarkItems(filterItems);
+  }, [bucketList]);
+
   return (
-    <Box marginBottom={5}>
+    <Box>
       <Typography variant="h2" component="h2">
         Bookmarks
       </Typography>
 
-      <Typography variant="body1" component="p">
-        No data found.
-      </Typography>
+      <CardArea items={bookmarkItems} toggleBookmark={handleBookmark} />
     </Box>
   )
 }

@@ -1,20 +1,42 @@
-import { FC, useContext } from 'react';
-import { Link } from "react-router-dom";
+import { FC, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { Box, Grid, Typography } from '@mui/material';
 import { useStyles } from './style';
 
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { AppContext } from '../../contexts';
-import { items } from '../../services/mocks/items.mock';
+import { useLimitItems } from '../../hooks/useLimitItems';
+import { ItemsTypes } from '../../types';
 
 import CardArea from '../../components/Card';
-import { useLimitItems } from '../../hooks/useLimitItems';
 
 const HomeArea: FC = () => {
   const classes = useStyles();
-  const [bucketList] = useLocalStorage("bucketList");
-  const { limitItems, isLoading } = useLimitItems(bucketList, 3);
+  const [items, setItems] = useState<ItemsTypes[]>([]);
+  const [bucketList, setBucketList] = useLocalStorage("bucketList");
+  const { limitItems: destinationItems } = useLimitItems(bucketList, 3);
+  const { limitItems: bookmarkItems } = useLimitItems(items, 3);
+
+  const handleBookmark = (id: number) => {
+    let updatedItems = bucketList.map((item: ItemsTypes) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          isBookmark: !item?.isBookmark,
+        }
+      } else {
+        return item;
+      }
+    });
+
+    setBucketList(updatedItems);
+  };
+
+  useEffect(() => {
+    const filterItems = bucketList.filter((item: any) => item.isBookmark === true);
+    setItems(filterItems);
+    localStorage.setItem('bucketList', JSON.stringify(bucketList));
+  }, [bucketList]);
 
   return (
     <>
@@ -23,13 +45,13 @@ const HomeArea: FC = () => {
           Bookmarks
         </Typography>
 
-        <CardArea items={limitItems} toggleBookmark={(id: number) => console.log(id)} />
+        <CardArea items={bookmarkItems} toggleBookmark={handleBookmark} />
 
-        <Grid container justifyContent="right">
+        {items.length > bookmarkItems.length && <Grid container justifyContent="right">
           <Grid item xs="auto">
             <Link to="/bookmarks" className={classes.home__link}>See More</Link>
           </Grid>
-        </Grid>
+        </Grid>}
       </Box>
 
       <Box>
@@ -37,7 +59,13 @@ const HomeArea: FC = () => {
           Destinations
         </Typography>
 
-        <CardArea items={bucketList} toggleBookmark={(id: number) => console.log(id)} />
+        <CardArea items={destinationItems} toggleBookmark={handleBookmark} />
+
+        {bucketList.length > destinationItems.length && <Grid container justifyContent="right">
+          <Grid item xs="auto">
+            <Link to="/destinations" className={classes.home__link}>See More</Link>
+          </Grid>
+        </Grid>}
       </Box>
     </>
   )
