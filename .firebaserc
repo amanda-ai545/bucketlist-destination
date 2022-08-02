@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "mybucketlist-app",
+    "mybucketlist.io": "mybucketlist-app"
+  },
+  "targets": {},
+  "etags": {}
+}

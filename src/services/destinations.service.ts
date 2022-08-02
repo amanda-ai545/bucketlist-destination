@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL;
 const API_NAME = process.env.REACT_APP_API_KEY_NAME;
-const API_KEY = process.env.REACT_APP_API_KEY;
+const API_KEY = process.env.REACT_APP_API_KEYS;
 
 export const services = {
   getLocation: async (url: string) => {
