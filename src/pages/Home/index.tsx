@@ -14,8 +14,8 @@ const HomeArea: FC = () => {
   const classes = useStyles();
   const [items, setItems] = useState<ItemsTypes[]>([]);
   const [bucketList, setBucketList] = useLocalStorage("bucketList");
-  const { limitItems: destinationItems } = useLimitItems(bucketList, 3);
-  const { limitItems: bookmarkItems } = useLimitItems(items, 3);
+  const { limitItems: destinationItems } = useLimitItems(bucketList, 4);
+  const { limitItems: bookmarkItems } = useLimitItems(items, 4);
 
   const handleBookmark = (id: number) => {
     let updatedItems = bucketList.map((item: ItemsTypes) => {

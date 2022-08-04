@@ -1,5 +1,6 @@
 import { FC, useEffect, useState, useContext } from 'react';
 import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
 import Select from 'react-select';
 
 import { Box, Grid, Modal, Button, Typography } from '@mui/material';
@@ -12,6 +13,7 @@ import { CountryTypes, StateTypes, OptionType, OptionTypeCity, ItemsTypes } from
 import DropZone from '../../components/DropZone';
 import CardArea from '../../components/Card';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { DestinationSchema } from '../../models/destinations.model';
 
 const DestinationsArea: FC = () => {
   const classes = useStyles();
@@ -70,13 +72,12 @@ const DestinationsArea: FC = () => {
     }
   };
 
-  const { control, handleSubmit, reset } = useForm<ItemsTypes>({
-    // resolver: yupResolver(schema),
+  const { control, handleSubmit, reset, formState: { errors } } = useForm<ItemsTypes>({
+    resolver: yupResolver(DestinationSchema),
     defaultValues: {
       country: {},
       state: {},
       city: {},
-      image: "",
       isBookmark: false,
     },
   });
@@ -179,9 +180,14 @@ const DestinationsArea: FC = () => {
                   onChange(val)
                 }}
                 isSearchable
-                isClearable
               />}
             />
+
+            <Typography variant="caption" className="text-red" display="block" paddingTop="4px" gutterBottom>
+              {errors?.country?.value?.message}
+            </Typography>
+
+            {JSON.stringify(errors)}
 
             {selectedCountry && <Controller
               name="state"
@@ -195,7 +201,6 @@ const DestinationsArea: FC = () => {
                   onChange(val)
                 }}
                 isSearchable
-                isClearable
               />}
             />}
 
@@ -207,7 +212,6 @@ const DestinationsArea: FC = () => {
                 value={state.cities.find((c: OptionTypeCity) => c?.value === value?.value)}
                 onChange={(val: any) => onChange(val)}
                 isSearchable
-                isClearable
               />}
             />}
 
