@@ -123,16 +123,19 @@ const DestinationsArea: FC = () => {
 
   useEffect(() => {
     handleCountries();
-  });
+    // eslint-disable-next-line
+  }, []);
 
   useEffect(() => {
     handleStates();
+    // eslint-disable-next-line
   }, [selectedCountry]);
 
   useEffect(() => {
     handleCities();
+    // eslint-disable-next-line
   }, [selectedState]);
-  
+
   return (
     <>
       <Grid container justifyContent="space-between">
