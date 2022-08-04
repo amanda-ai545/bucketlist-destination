@@ -132,11 +132,7 @@ const DestinationsArea: FC = () => {
   useEffect(() => {
     handleCities();
   }, [selectedState]);
-
-  useEffect(() => {
-    localStorage.setItem('bucketList', JSON.stringify(bucketList));
-  }, [bucketList]);
-
+  
   return (
     <>
       <Grid container justifyContent="space-between">

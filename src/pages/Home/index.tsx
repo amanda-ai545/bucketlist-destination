@@ -35,7 +35,6 @@ const HomeArea: FC = () => {
   useEffect(() => {
     const filterItems = bucketList.filter((item: any) => item.isBookmark === true);
     setItems(filterItems);
-    localStorage.setItem('bucketList', JSON.stringify(bucketList));
   }, [bucketList]);
 
   return (
