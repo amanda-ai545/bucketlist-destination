@@ -172,7 +172,6 @@ const DestinationsArea: FC = () => {
               name="country"
               control={control}
               render={({ field: { onChange, value, name, ref } }) => <Select
-                className="mb-20"
                 options={state.countries}
                 value={state.countries.find((c: OptionType) => c.value === value.value)}
                 onChange={(val: any) => {
@@ -186,8 +185,6 @@ const DestinationsArea: FC = () => {
             <Typography variant="caption" className="text-red" display="block" paddingTop="4px" gutterBottom>
               {errors?.country?.value?.message}
             </Typography>
-
-            {JSON.stringify(errors)}
 
             {selectedCountry && <Controller
               name="state"
